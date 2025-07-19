@@ -3,14 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <title>Feed Check</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
-    form { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; }
-    h2 { text-align: center; }
-    label { display: block; margin-top: 15px; font-weight: bold; }
-    input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; }
-    button { margin-top: 20px; padding: 10px 20px; background: #2196F3; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
+
+    form {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      width: 95%;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background: #2196F3;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1976D2;
+    }
   </style>
 </head>
 <body>
@@ -58,7 +114,7 @@
   <script>
     document.getElementById("feedCheckForm").addEventListener("submit", async function(e) {
       e.preventDefault();
-      
+
       const form = e.target;
       const formData = new FormData(form);
 
