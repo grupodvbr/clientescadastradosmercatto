@@ -2,109 +2,75 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>AVALIAÇÕES</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Feed Check</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <style>
-    * { box-sizing: border-box; }
-  
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-    }
-    
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #eef3f8;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
     }
 
     form {
-      background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      width: 95%;
-      max-width: 500px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    h2, h3 {
-      text-align: center;
-      margin-bottom: 15px;
+      background: white;
+      max-width: 700px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
 
     label {
+      font-weight: bold;
       display: block;
       margin-top: 15px;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button[type="submit"] {
+      background-color: #4CAF50;
+      margin-top: 20px;
+      color: white;
       font-weight: bold;
     }
 
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    button {
-      margin-top: 25px;
-      width: 100%;
-      padding: 12px;
-      background: #2196F3;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1976D2;
-    }
-
-    /* Spinner */
-    #loadingSpinner {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255,255,255,0.8);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    }
-
     .spinner {
-      border: 8px solid #eee;
-      border-top: 8px solid #2196F3;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
+      display: none;
+      margin-top: 10px;
+      text-align: center;
+      color: #555;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .spinner.show {
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div id="loadingSpinner"><div class="spinner"></div></div>
 
-  <form id="feedCheckForm">
-    <h2>AVALIE O SISTEMA</h2>
-    <h3>Sugira melhorias e aponte erros no sistema</h3>
+  <form id="feedForm">
+    <h2>📋 FEED CHECK</h2>
 
-    <label for="nome">Nome:</label>
-    <input type="text" id="nome" name="nome" required>
+    <label>Nome Completo:</label>
+    <input type="text" name="nome" required>
 
-    <label for="empresa">Empresa:</label>
-    <select id="empresa" name="empresa" required>
+    <label>Empresa:</label>
+    <select name="empresa" required>
       <option value="">Selecione a empresa</option>
       <option value="Mercatto Delícia">Mercatto Delícia</option>
       <option value="Delícia Gourmet">Delícia Gourmet</option>
@@ -113,8 +79,8 @@
       <option value="Padaria Delícia">Padaria Delícia</option>
     </select>
 
-    <label for="setor">Setor:</label>
-    <select id="setor" name="setor" required>
+    <label>Setor:</label>
+    <select name="setor" required>
       <option value="">Selecione o setor</option>
       <option value="Cozinha">Cozinha</option>
       <option value="Caixa">Caixa</option>
@@ -129,65 +95,67 @@
       <option value="Confeitaria">Confeitaria</option>
     </select>
 
-    <label for="observacoes">Observações:</label>
-    <textarea id="observacoes" name="observacoes" rows="4"></textarea>
+    <label>Observações:</label>
+    <textarea name="observacoes" rows="3"></textarea>
 
-    <label for="arquivo">Upload de Arquivo (opcional):</label>
-    <input type="file" id="arquivo" name="arquivo" accept=".jpg,.png,.pdf">
+    <label>Arquivo (opcional):</label>
+    <input type="file" id="arquivo" accept=".pdf,.jpg,.jpeg,.png">
 
-    <button type="submit">Enviar</button>
+    <div class="spinner" id="spinner">⬤ Enviando feed check...</div>
+    <button type="submit">Enviar Feed Check</button>
   </form>
 
   <script>
-    const spinner = document.getElementById("loadingSpinner");
+    const form = document.getElementById('feedForm');
+    const spinner = document.getElementById('spinner');
+    const inputArquivo = document.getElementById('arquivo');
 
-    document.getElementById("feedCheckForm").addEventListener("submit", async function(e) {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      spinner.style.display = "flex"; // Mostrar spinner
+      spinner.classList.add("show");
 
-      const form = e.target;
       const formData = new FormData(form);
+      const dados = {};
 
-      const file = formData.get("arquivo");
-      if (file && file.name) {
-        const reader = new FileReader();
-        reader.onload = async function () {
-          const base64 = reader.result.split(",")[1];
-          formData.set("arquivoBase64", base64);
-          formData.set("arquivoNome", file.name);
-          await enviarDados(formData);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        await enviarDados(formData);
+      for (const [key, value] of formData.entries()) {
+        dados[key] = value;
+      }
+
+      const file = inputArquivo.files[0];
+      if (file) {
+        const base64 = await toBase64(file);
+        dados["arquivoBase64"] = base64.split(',')[1];
+        dados["arquivoNome"] = file.name;
+      }
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbzq84RU0Z4l2qLMjnY8um0pm2yi6sfp3IscUPPah4mEhSNNs3ZDZEbS2NceNDmkpLwvFw/exec", {
+          method: "POST",
+          body: JSON.stringify(dados),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        const resText = await response.text();
+        alert("✅ Feed Check enviado com sucesso!");
+        form.reset();
+      } catch (err) {
+        alert("Erro ao enviar. Verifique a internet.");
+        console.error(err);
+      } finally {
+        spinner.classList.remove("show");
       }
     });
 
-    async function enviarDados(formData) {
-      const jsonData = {};
-      formData.forEach((value, key) => {
-        jsonData[key] = value;
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
-
-      try {
-        const resposta = await fetch("https://script.google.com/macros/s/AKfycbxskSOJXccE19kKiufvp3jq02-W99HNWXFTW7Re8WzZeww9nl5eWmayS0oUObB8PHXtow/exec", {
-          method: "POST",
-          body: JSON.stringify(jsonData),
-          headers: { "Content-Type": "application/json" }
-        });
-
-        if (resposta.ok) {
-          alert("Feed Check enviado com sucesso!");
-          document.getElementById("feedCheckForm").reset();
-        } else {
-          alert("Erro ao enviar. Tente novamente.");
-        }
-      } catch (err) {
-        alert("Erro de conexão. Verifique sua internet.");
-      } finally {
-        spinner.style.display = "none"; // Ocultar spinner
-      }
     }
   </script>
+
 </body>
 </html>
