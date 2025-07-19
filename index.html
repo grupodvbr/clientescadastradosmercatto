@@ -1,126 +1,191 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Avaliação do Sistema</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>AVALIAÇÕES</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+    * { box-sizing: border-box; }
+  
+    html, body {
+      height: 100%;
       margin: 0;
-      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
     }
-    .container {
-      max-width: 500px;
-      margin: auto;
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
+
+    form {
       background: #fff;
-      padding: 30px;
+      padding: 25px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 95%;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    h1 {
+
+    h2, h3 {
       text-align: center;
-      color: #111;
+      margin-bottom: 15px;
     }
+
     label {
-      font-weight: bold;
       display: block;
       margin-top: 15px;
+      font-weight: bold;
     }
-    input, select, textarea, button {
+
+    input, select, textarea {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin-top: 5px;
-      box-sizing: border-box;
-    }
-    button {
-      background: #2196F3;
-      color: white;
-      border: none;
-      cursor: pointer;
+      border-radius: 5px;
+      border: 1px solid #ccc;
       font-size: 16px;
-      margin-top: 20px;
     }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background: #2196F3;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
     button:hover {
       background: #1976D2;
+    }
+
+    /* Spinner */
+    #loadingSpinner {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .spinner {
+      border: 8px solid #eee;
+      border-top: 8px solid #2196F3;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>AVALE O SISTEMA</h1>
-    <p style="text-align:center">Sugira melhorias e aponte erros no sistema</p>
-    <form id="feedbackForm">
-      <label>Nome:</label>
-      <input type="text" name="nome" required value="NALBERT DE SOUZA SANTOS"/>
+  <div id="loadingSpinner"><div class="spinner"></div></div>
 
-      <label>Empresa:</label>
-      <select name="empresa" required>
-        <option value="Mercatto Delícia">Mercatto Delícia</option>
-      </select>
+  <form id="feedCheckForm">
+    <h2>AVALIE O SISTEMA</h2>
+    <h3>Sugira melhorias e aponte erros no sistema</h3>
 
-      <label>Setor:</label>
-      <select name="setor" required>
-        <option value="Caixa">Caixa</option>
-        <option value="Cozinha">Cozinha</option>
-        <option value="Salão">Salão</option>
-      </select>
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" required>
 
-      <label>Observações:</label>
-      <textarea name="observacoes" rows="4"></textarea>
+    <label for="empresa">Empresa:</label>
+    <select id="empresa" name="empresa" required>
+      <option value="">Selecione a empresa</option>
+      <option value="Mercatto Delícia">Mercatto Delícia</option>
+      <option value="Delícia Gourmet">Delícia Gourmet</option>
+      <option value="Villa Gourmet">Villa Gourmet</option>
+      <option value="M.Kids">M.Kids</option>
+      <option value="Padaria Delícia">Padaria Delícia</option>
+    </select>
 
-      <label>Upload de Arquivo (opcional):</label>
-      <input type="file" id="arquivo" accept="application/pdf,image/*" />
+    <label for="setor">Setor:</label>
+    <select id="setor" name="setor" required>
+      <option value="">Selecione o setor</option>
+      <option value="Cozinha">Cozinha</option>
+      <option value="Caixa">Caixa</option>
+      <option value="Bar">Bar</option>
+      <option value="Limpeza">Limpeza</option>
+      <option value="Estoque">Estoque</option>
+      <option value="Gerência">Gerência</option>
+      <option value="Sushi">Sushi</option>
+      <option value="Segurança">Segurança</option>
+      <option value="Churrasco">Churrasco</option>
+      <option value="M.Kids">M.Kids</option>
+      <option value="Confeitaria">Confeitaria</option>
+    </select>
 
-      <button type="submit">Enviar</button>
-    </form>
-  </div>
+    <label for="observacoes">Observações:</label>
+    <textarea id="observacoes" name="observacoes" rows="4"></textarea>
+
+    <label for="arquivo">Upload de Arquivo (opcional):</label>
+    <input type="file" id="arquivo" name="arquivo" accept=".jpg,.png,.pdf">
+
+    <button type="submit">Enviar</button>
+  </form>
 
   <script>
-    const form = document.getElementById('feedbackForm');
+    const spinner = document.getElementById("loadingSpinner");
 
-    form.addEventListener('submit', async function(e) {
+    document.getElementById("feedCheckForm").addEventListener("submit", async function(e) {
       e.preventDefault();
+      spinner.style.display = "flex"; // Mostrar spinner
 
-      const dados = {
-        nome: form.nome.value,
-        empresa: form.empresa.value,
-        setor: form.setor.value,
-        observacoes: form.observacoes.value,
-      };
+      const form = e.target;
+      const formData = new FormData(form);
 
-      const fileInput = document.getElementById("arquivo");
-      if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
+      const file = formData.get("arquivo");
+      if (file && file.name) {
         const reader = new FileReader();
-        reader.onloadend = async function () {
-          dados.arquivoBase64 = reader.result.split(",")[1];
-          dados.arquivoNome = file.name;
-          await enviarDados(dados);
+        reader.onload = async function () {
+          const base64 = reader.result.split(",")[1];
+          formData.set("arquivoBase64", base64);
+          formData.set("arquivoNome", file.name);
+          await enviarDados(formData);
         };
         reader.readAsDataURL(file);
       } else {
-        await enviarDados(dados);
+        await enviarDados(formData);
       }
     });
 
-    async function enviarDados(dados) {
+    async function enviarDados(formData) {
+      const jsonData = {};
+      formData.forEach((value, key) => {
+        jsonData[key] = value;
+      });
+
       try {
         const resposta = await fetch("https://script.google.com/macros/s/AKfycbyzUlLwSYXkoyIIxcc685V3QyuqlhQZcSqXtscM4e3_4gq8DiE5DQNY98UYUw4xdpo1cA/exec", {
           method: "POST",
-          body: JSON.stringify(dados),
-          headers: {
-            "Content-Type": "application/json",
-          }
+          body: JSON.stringify(jsonData),
+          headers: { "Content-Type": "application/json" }
         });
 
-        if (!resposta.ok) throw new Error("Erro ao enviar dados.");
-
-        alert("✅ Feedback enviado com sucesso!");
-        form.reset();
-      } catch (erro) {
-        alert("Erro de conexão. Verifique sua internet ou tente novamente mais tarde.");
+        if (resposta.ok) {
+          alert("Feed Check enviado com sucesso!");
+          document.getElementById("feedCheckForm").reset();
+        } else {
+          alert("Erro ao enviar. Tente novamente.");
+        }
+      } catch (err) {
+        alert("Erro de conexão. Verifique sua internet.");
+      } finally {
+        spinner.style.display = "none"; // Ocultar spinner
       }
     }
   </script>
