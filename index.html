@@ -23,7 +23,7 @@
       display: block;
       margin-top: 15px;
     }
-    input, textarea {
+    input, select, textarea {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -47,20 +47,35 @@
 <body>
   <form id="feedbackForm">
     <h2>Formulário de Feedback</h2>
+
     <label for="nome">Nome:</label>
     <input type="text" id="nome" required>
 
     <label for="setor">Setor:</label>
-    <input type="text" id="setor" required>
+    <select id="setor" required>
+      <option value="">Selecione...</option>
+      <option value="Caixa">Caixa</option>
+      <option value="Cozinha">Cozinha</option>
+      <option value="Salão">Salão</option>
+      <option value="Limpeza">Limpeza</option>
+      <option value="Gerência">Gerência</option>
+    </select>
 
     <label for="empresa">Empresa:</label>
-    <input type="text" id="empresa" required>
+    <select id="empresa" required>
+      <option value="">Selecione...</option>
+      <option value="MERCATTO DELICIA">MERCATTO DELICIA</option>
+      <option value="DELICIA GOURMET">DELICIA GOURMET</option>
+      <option value="PADARIA DELICIA">PADARIA DELICIA</option>
+      <option value="VILLA GOURMET">VILLA GOURMET</option>
+      <option value="MERCATTO KIDS">MERCATTO KIDS</option>
+    </select>
 
     <label for="observacoes">Observações:</label>
     <textarea id="observacoes" rows="4"></textarea>
 
-    <label for="arquivo">Anexar Arquivo:</label>
-    <input type="file" id="arquivo" accept=".pdf,image/*" required>
+    <label for="arquivo">Anexar Arquivo (opcional):</label>
+    <input type="file" id="arquivo" accept=".pdf,image/*">
 
     <button type="submit">Enviar</button>
   </form>
@@ -75,21 +90,28 @@
       const observacoes = document.getElementById("observacoes").value;
       const file = document.getElementById("arquivo").files[0];
 
-      if (!file) return alert("Selecione um arquivo!");
+      const payload = {
+        nome,
+        setor,
+        empresa,
+        observacoes,
+        arquivoBase64: "",
+        arquivoNome: ""
+      };
 
-      const reader = new FileReader();
-      reader.onloadend = async function () {
-        const base64Data = reader.result.split(',')[1];
-
-        const payload = {
-          nome,
-          setor,
-          empresa,
-          observacoes,
-          arquivoBase64: base64Data,
-          arquivoNome: file.name
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = async function () {
+          payload.arquivoBase64 = reader.result.split(',')[1];
+          payload.arquivoNome = file.name;
+          await enviarFormulario(payload);
         };
+        reader.readAsDataURL(file);
+      } else {
+        await enviarFormulario(payload);
+      }
 
+      async function enviarFormulario(payload) {
         try {
           const response = await fetch("https://script.google.com/macros/s/AKfycbxwd9nqFrkd1qukeb4Ve_leS4_jd8xAaFwftsCw6c9O16YkMQ0J5Io_MYRA5tLzIBdy/exec", {
             method: "POST",
@@ -103,8 +125,7 @@
         } catch (err) {
           alert("Erro ao enviar: " + err.message);
         }
-      };
-      reader.readAsDataURL(file);
+      }
     });
   </script>
 </body>
