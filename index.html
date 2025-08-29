@@ -1,193 +1,233 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Avaliações</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <style>
-    * { box-sizing: border-box; }
-  
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-    }
-    
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0;
-    }
-
-    form {
-      background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      width: 95%;
-      max-width: 500px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    h2, h3 {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    button {
-      margin-top: 25px;
-      width: 100%;
-      padding: 12px;
-      background: #2196F3;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1976D2;
-    }
-
-    /* Spinner */
-    #loadingSpinner {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255,255,255,0.8);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .spinner {
-      border: 8px solid #eee;
-      border-top: 8px solid #2196F3;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"/>
+<title>Painel de Clientes</title>
+<meta name="color-scheme" content="light"/>
+<style>
+  :root{
+    --bg:#ffffff; --text:#111827; --muted:#6b7280;
+    --blue:#60a5fa; --blue-strong:#3b82f6; --blue-soft:#dbeafe;
+    --border:#e5e7eb; --card:#ffffff; --shadow:0 10px 25px rgba(0,0,0,.08);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10}
+  .wrap{max-width:980px;margin:0 auto;padding:14px 16px;display:flex;gap:10px;align-items:center}
+  h1{margin:0;font-size:18px}
+  main{max-width:980px;margin:18px auto;padding:0 16px;display:grid;gap:16px}
+  .toolbar{display:flex;gap:8px;align-items:center}
+  .toolbar input{flex:1;min-width:0;padding:12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+  .toolbar button{border:0;border-radius:10px;padding:12px 14px;background:var(--blue);color:#0b1020;font-weight:700}
+  .list{display:grid;gap:10px}
+  .item{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+  .item .name{font-weight:700}
+  .item .date{color:var(--muted);font-size:12px}
+  .empty{padding:18px;text-align:center;border:1px dashed var(--border);border-radius:12px;color:var(--muted)}
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:flex-end}
+  .modal.show{display:flex}
+  .sheet{background:#fff;border-radius:16px 16px 0 0;box-shadow:var(--shadow);padding:16px;width:100%}
+  @media (min-width:740px){.modal{align-items:center;justify-content:center}.sheet{border-radius:16px;max-width:720px}}
+  .sheet h3{margin:0 0 10px}
+  .grid{display:grid;grid-template-columns:1fr;gap:10px}
+  @media (min-width:740px){.grid{grid-template-columns:1fr 1fr}}
+  label{font-size:12px;color:#374151}
+  input{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px}
+  .row{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+  .btn{border:0;border-radius:10px;padding:10px 12px;cursor:pointer}
+  .btn.primary{background:var(--blue);color:#0b1020;font-weight:700}
+  .btn.ghost{background:#fff;border:1px solid var(--border)}
+  .btn.danger{background:#fecaca;color:#7f1d1d;border:1px solid #fca5a5}
+  .hint{font-size:12px;color:var(--muted)}
+  .pill{background:var(--blue-soft);color:#1e3a8a;padding:4px 8px;border-radius:999px;font-size:12px}
+  .toast{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;border-radius:10px;padding:10px 14px;display:none}
+  .toast.show{display:block}
+</style>
 </head>
 <body>
-  <div id="loadingSpinner"><div class="spinner"></div></div>
+<header><div class="wrap"><h1>Painel de Clientes</h1><span id="status" class="pill">checando…</span></div></header>
 
-  <form id="feedCheckForm">
-    <h2>AVALIE O SISTEMA</h2>
-    <h3>Sugira melhorias e informe erros no sistema</h3>
+<main>
+  <div class="toolbar">
+    <input id="busca" placeholder="Buscar por nome, documento, cidade…" />
+    <button id="btnAtualizar">Atualizar</button>
+  </div>
 
-    <label for="nome">Nome:</label>
-    <input type="text" id="nome" name="nome" required>
+  <div id="lista" class="list"></div>
+  <div id="vazio" class="empty" style="display:none">Nenhum cliente encontrado.</div>
+</main>
 
-    <label for="empresa">Empresa:</label>
-    <select id="empresa" name="empresa" required>
-      <option value="">Selecione a empresa</option>
-      <option value="Mercatto Delícia">Mercatto Delícia</option>
-      <option value="Delícia Gourmet">Delícia Gourmet</option>
-      <option value="Villa Gourmet">Villa Gourmet</option>
-      <option value="M.Kids">M.Kids</option>
-      <option value="Padaria Delícia">Padaria Delícia</option>
-    </select>
+<!-- Modal -->
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="sheet">
+    <h3 id="mTitle">Cliente</h3>
+    <div class="grid">
+      <div><label>Documento</label><input id="mDocumento" readonly/></div>
+      <div><label>Tipo</label><input id="mTipo" /></div>
+      <div><label>Nome</label><input id="mNome" /></div>
+      <div><label>Nascimento</label><input id="mNascimento" type="date"/></div>
+      <div><label>Email</label><input id="mEmail"/></div>
+      <div><label>CEP</label><input id="mCep"/></div>
+      <div><label>UF</label><input id="mUf"/></div>
+      <div><label>Cidade</label><input id="mCidade"/></div>
+      <div><label>Logradouro</label><input id="mLogradouro"/></div>
+      <div><label>Número</label><input id="mNumero"/></div>
+      <div><label>Bairro</label><input id="mBairro"/></div>
+      <div><label>Complemento</label><input id="mComplemento"/></div>
+    </div>
+    <div class="hint" style="margin-top:6px">Criado em: <span id="mCriado"></span></div>
+    <div class="row">
+      <button class="btn ghost" id="btnFechar">Fechar</button>
+      <button class="btn danger" id="btnExcluir">Excluir</button>
+      <button class="btn primary" id="btnEditar">Salvar</button>
+    </div>
+  </div>
+</div>
 
-    <label for="setor">Setor:</label>
-    <select id="setor" name="setor" required>
-      <option value="">Selecione o setor</option>
-      <option value="Cozinha">Cozinha</option>
-      <option value="Caixa">Caixa</option>
-      <option value="Bar">Bar</option>
-      <option value="Limpeza">Limpeza</option>
-      <option value="Estoque">Estoque</option>
-      <option value="Gerência">Gerência</option>
-      <option value="Sushi">Sushi</option>
-      <option value="Segurança">Segurança</option>
-      <option value="Churrasco">Churrasco</option>
-      <option value="M.Kids">M.Kids</option>
-      <option value="Confeitaria">Confeitaria</option>
-    </select>
+<div id="toast" class="toast">ok</div>
 
-    <label for="observacoes">Observações:</label>
-    <textarea id="observacoes" name="observacoes" rows="4"></textarea>
+<script>
+  // >>>> TROQUE AQUI <<<<
+  const GAS_URL = 'https://script.google.com/macros/s/SEU_ID/exec';
 
-    <label for="arquivo">Upload de Arquivo (opcional):</label>
-    <input type="file" id="arquivo" name="arquivo" accept=".jpg,.png,.pdf">
+  const qs = s => document.querySelector(s);
+  const elLista = qs('#lista');
+  const elVazio = qs('#vazio');
+  const elBusca = qs('#busca');
+  const statusPill = qs('#status');
 
-    <button type="submit">Enviar</button>
-  </form>
+  let cache = [];
 
-  <script>
-    const spinner = document.getElementById("loadingSpinner");
+  function showToast(msg){ const t=qs('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+  function fmtDate(x){ const d=new Date(x); if(isNaN(d)) return x||''; return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) }
+  function onlyDate(x){ const d=new Date(x); if(isNaN(d)) return x||''; return d.toLocaleDateString('pt-BR'); }
 
-    document.getElementById("feedCheckForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      spinner.style.display = "flex"; // Mostrar spinner
+  async function ping(){
+    try{ const r=await fetch(`${GAS_URL}?ping=1`); statusPill.textContent = r.ok?'online':'offline'; statusPill.style.background = r.ok?'#d1fae5':'#fee2e2'; statusPill.style.color = r.ok?'#065f46':'#7f1d1d'; }
+    catch{ statusPill.textContent='offline'; statusPill.style.background='#fee2e2'; statusPill.style.color='#7f1d1d'; }
+  }
 
-      const form = e.target;
-      const formData = new FormData(form);
+  async function carregar(){
+    const r = await fetch(GAS_URL);
+    const j = await r.json();
+    cache = j.data || [];
+    render();
+  }
 
-      const file = formData.get("arquivo");
-      if (file && file.name) {
-        const reader = new FileReader();
-        reader.onload = async function () {
-          const base64 = reader.result.split(",")[1];
-          formData.set("arquivoBase64", base64);
-          formData.set("arquivoNome", file.name);
-          await enviarDados(formData);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        await enviarDados(formData);
-      }
+  function render(){
+    const q = elBusca.value.trim().toLowerCase();
+    const rows = !q ? cache : cache.filter(o => {
+      const hay = `${o.nome||''} ${o.documento||''} ${o.cidade||''}`.toLowerCase();
+      return hay.includes(q);
     });
 
-    async function enviarDados(formData) {
-      const jsonData = {};
-      formData.forEach((value, key) => {
-        jsonData[key] = value;
-      });
+    elLista.innerHTML = '';
+    if (!rows.length){ elVazio.style.display='block'; return; }
+    elVazio.style.display='none';
 
-      try {
-        const resposta = await fetch("https://script.google.com/macros/s/AKfycbywb9BPAwsMVWBkaqTozJoicDUHfWeOqCQWcjX9uXcsjOaZc3vreyWMJ2CuOI4RQEudpA/exec", {
-          method: "POST",
-          body: JSON.stringify(jsonData),
-          headers: { "Content-Type": "application/json" }
-        });
+    rows.forEach(o => {
+      const btn = document.createElement('button');
+      btn.className='item';
+      btn.innerHTML = `<span class="name">${o.nome || '(sem nome)'}</span>
+                       <span class="date">${fmtDate(o.criadoEm)}</span>`;
+      btn.addEventListener('click', ()=> openModal(o));
+      elLista.appendChild(btn);
+    });
+  }
 
-        if (resposta.ok) {
-          alert("Feed Check enviado com sucesso!");
-          document.getElementById("feedCheckForm").reset();
-        } else {
-          alert("Erro ao enviar. Tente novamente.");
-        }
-      } catch (err) {
-        alert("Erro de conexão. Verifique sua internet.");
-      } finally {
-        spinner.style.display = "none"; // Ocultar spinner
-      }
-    }
-  </script>
+  // MODAL
+  const modal = qs('#modal');
+  const fields = {
+    criadoEm: qs('#mCriado'), documento: qs('#mDocumento'), tipo: qs('#mTipo'),
+    nome: qs('#mNome'), nascimento: qs('#mNascimento'), email: qs('#mEmail'),
+    cep: qs('#mCep'), uf: qs('#mUf'), cidade: qs('#mCidade'),
+    logradouro: qs('#mLogradouro'), numero: qs('#mNumero'),
+    bairro: qs('#mBairro'), complemento: qs('#mComplemento')
+  };
+  let current = null;
+
+  function openModal(o){
+    current = o;
+    qs('#mTitle').textContent = o.nome || 'Cliente';
+    fields.criadoEm.textContent = fmtDate(o.criadoEm);
+    fields.documento.value = o.documento || '';
+    fields.tipo.value = o.tipo || '';
+    fields.nome.value = o.nome || '';
+    fields.nascimento.value = (o.nascimento && !isNaN(new Date(o.nascimento))) ? new Date(o.nascimento).toISOString().slice(0,10) : '';
+    fields.email.value = o.email || '';
+    fields.cep.value = o.cep || '';
+    fields.uf.value = o.uf || '';
+    fields.cidade.value = o.cidade || '';
+    fields.logradouro.value = o.logradouro || '';
+    fields.numero.value = o.numero || '';
+    fields.bairro.value = o.bairro || '';
+    fields.complemento.value = o.complemento || '';
+    modal.classList.add('show');
+  }
+  function closeModal(){ modal.classList.remove('show'); current = null; }
+
+  qs('#btnFechar').addEventListener('click', closeModal);
+
+  // Salvar (EDITAR) – pede senha e envia _action=update
+  qs('#btnEditar').addEventListener('click', async ()=>{
+    if (!current) return;
+    const password = prompt('Digite a senha para salvar as alterações:');
+    if (!password) return;
+
+    const payload = {
+      _action:'update',
+      password,
+      documento: fields.documento.value.replace(/\D+/g,''),
+      tipo: fields.tipo.value,
+      nome: fields.nome.value,
+      nascimento: fields.nascimento.value,
+      email: fields.email.value,
+      cep: fields.cep.value,
+      uf: fields.uf.value,
+      cidade: fields.cidade.value,
+      logradouro: fields.logradouro.value,
+      numero: fields.numero.value,
+      bairro: fields.bairro.value,
+      complemento: fields.complemento.value
+    };
+    const body = new URLSearchParams(payload).toString();
+    try{
+      const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body });
+      const j = await r.json();
+      if (j.ok){ showToast('Atualizado'); closeModal(); await carregar(); }
+      else { alert('Erro: ' + (j.error||'Falha ao atualizar')); }
+    }catch(err){ alert('Erro de rede'); }
+  });
+
+  // Excluir – pede senha e envia _action=delete
+  qs('#btnExcluir').addEventListener('click', async ()=>{
+    if (!current) return;
+    const password = prompt('Digite a senha para EXCLUIR este cliente:');
+    if (!password) return;
+    if (!confirm('Tem certeza que deseja excluir?')) return;
+
+    const body = new URLSearchParams({
+      _action:'delete', password,
+      documento: (fields.documento.value||'').replace(/\D+/g,'')
+    }).toString();
+
+    try{
+      const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body });
+      const j = await r.json();
+      if (j.ok){ showToast('Excluído'); closeModal(); await carregar(); }
+      else { alert('Erro: ' + (j.error||'Falha ao excluir')); }
+    }catch(err){ alert('Erro de rede'); }
+  });
+
+  // Eventos
+  elBusca.addEventListener('input', render);
+  qs('#btnAtualizar').addEventListener('click', carregar);
+
+  // boot
+  ping(); carregar();
+</script>
 </body>
 </html>
