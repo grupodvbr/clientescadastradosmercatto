@@ -45,6 +45,11 @@
   .pill{background:var(--blue-soft);color:#1e3a8a;padding:4px 8px;border-radius:999px;font-size:12px}
   .toast{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;border-radius:10px;padding:10px 14px;display:none}
   .toast.show{display:block}
+  /* overlay de carregamento */
+  .overlay{position:fixed;inset:0;background:rgba(255,255,255,.65);display:none;align-items:center;justify-content:center;z-index:9999}
+  .overlay.show{display:flex}
+  .spinner{width:40px;height:40px;border:4px solid #3b82f630;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -88,9 +93,9 @@
 </div>
 
 <div id="toast" class="toast">ok</div>
+<div id="overlay" class="overlay"><div class="spinner"></div></div>
 
 <script>
-  // >>>> TROQUE AQUI <<<<
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbz0IJlBql79zMdk8PxExyHd6BYMW4a0gyAHDLakedsSozFopUGu9GiAIkvnqsGkIn1L/exec';
 
   const qs = s => document.querySelector(s);
@@ -98,12 +103,12 @@
   const elVazio = qs('#vazio');
   const elBusca = qs('#busca');
   const statusPill = qs('#status');
+  const overlay = qs('#overlay');
 
   let cache = [];
 
   function showToast(msg){ const t=qs('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
   function fmtDate(x){ const d=new Date(x); if(isNaN(d)) return x||''; return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) }
-  function onlyDate(x){ const d=new Date(x); if(isNaN(d)) return x||''; return d.toLocaleDateString('pt-BR'); }
 
   async function ping(){
     try{ const r=await fetch(`${GAS_URL}?ping=1`); statusPill.textContent = r.ok?'online':'offline'; statusPill.style.background = r.ok?'#d1fae5':'#fee2e2'; statusPill.style.color = r.ok?'#065f46':'#7f1d1d'; }
@@ -171,8 +176,14 @@
 
   qs('#btnFechar').addEventListener('click', closeModal);
 
-  // Salvar (EDITAR) – pede senha e envia _action=update
-  qs('#btnEditar').addEventListener('click', async ()=>{
+  // Helper: executa ação com overlay
+  async function withLoading(fn){
+    overlay.classList.add('show');
+    try{ await fn(); }finally{ overlay.classList.remove('show'); }
+  }
+
+  // Salvar (EDITAR)
+  qs('#btnEditar').addEventListener('click', ()=>withLoading(async ()=>{
     if (!current) return;
     const password = prompt('Digite a senha para salvar as alterações:');
     if (!password) return;
@@ -194,16 +205,14 @@
       complemento: fields.complemento.value
     };
     const body = new URLSearchParams(payload).toString();
-    try{
-      const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body });
-      const j = await r.json();
-      if (j.ok){ showToast('Atualizado'); closeModal(); await carregar(); }
-      else { alert('Erro: ' + (j.error||'Falha ao atualizar')); }
-    }catch(err){ alert('Erro de rede'); }
-  });
+    const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+    const j = await r.json();
+    if (j.ok){ showToast('Atualizado'); closeModal(); await carregar(); }
+    else { alert('Erro: ' + (j.error||'Falha ao atualizar')); }
+  }));
 
-  // Excluir – pede senha e envia _action=delete
-  qs('#btnExcluir').addEventListener('click', async ()=>{
+  // Excluir
+  qs('#btnExcluir').addEventListener('click', ()=>withLoading(async ()=>{
     if (!current) return;
     const password = prompt('Digite a senha para EXCLUIR este cliente:');
     if (!password) return;
@@ -214,13 +223,11 @@
       documento: (fields.documento.value||'').replace(/\D+/g,'')
     }).toString();
 
-    try{
-      const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body });
-      const j = await r.json();
-      if (j.ok){ showToast('Excluído'); closeModal(); await carregar(); }
-      else { alert('Erro: ' + (j.error||'Falha ao excluir')); }
-    }catch(err){ alert('Erro de rede'); }
-  });
+    const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+    const j = await r.json();
+    if (j.ok){ showToast('Excluído'); closeModal(); await carregar(); }
+    else { alert('Erro: ' + (j.error||'Falha ao excluir')); }
+  }));
 
   // Eventos
   elBusca.addEventListener('input', render);
