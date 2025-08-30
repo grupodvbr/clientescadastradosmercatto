@@ -15,7 +15,7 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
   header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10}
-  .wrap{max-width:980px;margin:0 auto;padding:14px 16px;display:flex;gap:10px;align-items:center}
+  .wrap{max-width:980px;margin:0 auto;padding:14px 16px;display:flex;gap:10px;align-items:center;justify-content:space-between}
   h1{margin:0;font-size:18px}
   main{max-width:980px;margin:18px auto;padding:0 16px;display:grid;gap:16px}
   .toolbar{display:flex;gap:8px;align-items:center}
@@ -26,6 +26,7 @@
   .item .name{font-weight:700}
   .item .date{color:var(--muted);font-size:12px}
   .empty{padding:18px;text-align:center;border:1px dashed var(--border);border-radius:12px;color:var(--muted)}
+
   /* modal */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:flex-end}
   .modal.show{display:flex}
@@ -45,15 +46,36 @@
   .pill{background:var(--blue-soft);color:#1e3a8a;padding:4px 8px;border-radius:999px;font-size:12px}
   .toast{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;border-radius:10px;padding:10px 14px;display:none}
   .toast.show{display:block}
+
   /* overlay de carregamento */
   .overlay{position:fixed;inset:0;background:rgba(255,255,255,.65);display:none;align-items:center;justify-content:center;z-index:9999}
   .overlay.show{display:flex}
   .spinner{width:40px;height:40px;border:4px solid #3b82f630;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* popup do link */
+  .popup{position:absolute;top:50px;right:16px;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow);border-radius:10px;padding:12px;display:none;z-index:999}
+  .popup.show{display:block}
+  .popup p{margin:0 0 8px;font-size:14px;word-break:break-all}
+  .popup button{margin-top:4px;display:block;width:100%;background:var(--blue);color:#fff;border:0;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px}
 </style>
 </head>
 <body>
-<header><div class="wrap"><h1>Painel de Clientes</h1><span id="status" class="pill">checando…</span></div></header>
+<header>
+  <div class="wrap">
+    <h1>Painel de Clientes</h1>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="status" class="pill">checando…</span>
+      <button id="btnLink" style="background:none;border:0;cursor:pointer;font-size:18px">↗</button>
+    </div>
+  </div>
+</header>
+
+<div id="popup" class="popup">
+  <p id="popupLink"></p>
+  <button id="btnCopiar">📋 Copiar link</button>
+  <button id="btnAbrir">🔗 Abrir em nova aba</button>
+</div>
 
 <main>
   <div class="toolbar">
@@ -104,11 +126,25 @@
   const elBusca = qs('#busca');
   const statusPill = qs('#status');
   const overlay = qs('#overlay');
+  const popup = qs('#popup');
+  const popupLink = qs('#popupLink');
 
   let cache = [];
 
   function showToast(msg){ const t=qs('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
   function fmtDate(x){ const d=new Date(x); if(isNaN(d)) return x||''; return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) }
+
+  // popup
+  qs('#btnLink').addEventListener('click', ()=>{
+    popupLink.textContent = window.location.href;
+    popup.classList.toggle('show');
+  });
+  qs('#btnCopiar').addEventListener('click', ()=>{
+    navigator.clipboard.writeText(popupLink.textContent).then(()=> showToast('Link copiado!'));
+  });
+  qs('#btnAbrir').addEventListener('click', ()=>{
+    window.open(popupLink.textContent, '_blank');
+  });
 
   async function ping(){
     try{ const r=await fetch(`${GAS_URL}?ping=1`); statusPill.textContent = r.ok?'online':'offline'; statusPill.style.background = r.ok?'#d1fae5':'#fee2e2'; statusPill.style.color = r.ok?'#065f46':'#7f1d1d'; }
