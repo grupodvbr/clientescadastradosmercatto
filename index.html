@@ -96,7 +96,7 @@
 <div id="overlay" class="overlay"><div class="spinner"></div></div>
 
 <script>
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbz0IJlBql79zMdk8PxExyHd6BYMW4a0gyAHDLakedsSozFopUGu9GiAIkvnqsGkIn1L/exec';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzVQgS9uAGajqh5CaWEfhqThCaYKzOCinKEhqgrFIiLvqa51nvxRFljUwEv6lifURtJ/exec';
 
   const qs = s => document.querySelector(s);
   const elLista = qs('#lista');
@@ -118,7 +118,11 @@
   async function carregar(){
     const r = await fetch(GAS_URL);
     const j = await r.json();
-    cache = j.data || [];
+    // já normaliza row/_row/__row
+    cache = (j.data || []).map(o => ({
+      ...o,
+      __row: o.__row ?? o._row ?? o.row ?? null
+    }));
     render();
   }
 
@@ -191,6 +195,7 @@
     const payload = {
       _action:'update',
       password,
+      row: current?.__row ?? '', // 👈 envia a linha quando existir
       documento: fields.documento.value.replace(/\D+/g,''),
       tipo: fields.tipo.value,
       nome: fields.nome.value,
@@ -219,8 +224,11 @@
     if (!confirm('Tem certeza que deseja excluir?')) return;
 
     const body = new URLSearchParams({
-      _action:'delete', password,
-      documento: (fields.documento.value||'').replace(/\D+/g,'')
+      _action:'delete',
+      password,
+      row: current?.__row ?? '', // 👈 envia a linha quando existir
+      documento: (fields.documento.value||'').replace(/\D+/g,''),
+      criadoEm: current?.criadoEm || '' // 👈 fallback
     }).toString();
 
     const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
