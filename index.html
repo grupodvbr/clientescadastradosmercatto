@@ -118,7 +118,6 @@
   async function carregar(){
     const r = await fetch(GAS_URL);
     const j = await r.json();
-    // já normaliza row/_row/__row
     cache = (j.data || []).map(o => ({
       ...o,
       __row: o.__row ?? o._row ?? o.row ?? null
@@ -195,7 +194,7 @@
     const payload = {
       _action:'update',
       password,
-      row: current?.__row ?? '', // 👈 envia a linha quando existir
+      row: current?.__row ?? '',
       documento: fields.documento.value.replace(/\D+/g,''),
       tipo: fields.tipo.value,
       nome: fields.nome.value,
@@ -226,9 +225,9 @@
     const body = new URLSearchParams({
       _action:'delete',
       password,
-      row: current?.__row ?? '', // 👈 envia a linha quando existir
+      row: current?.__row ?? '',
       documento: (fields.documento.value||'').replace(/\D+/g,''),
-      criadoEm: current?.criadoEm || '' // 👈 fallback
+      criadoEm: current?.criadoEm || ''
     }).toString();
 
     const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
@@ -239,10 +238,11 @@
 
   // Eventos
   elBusca.addEventListener('input', render);
-  qs('#btnAtualizar').addEventListener('click', carregar);
+  qs('#btnAtualizar').addEventListener('click', ()=>withLoading(carregar));
 
   // boot
-  ping(); carregar();
+  ping();
+  withLoading(carregar);
 </script>
 </body>
 </html>
